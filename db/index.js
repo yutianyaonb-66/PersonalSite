@@ -1,23 +1,35 @@
 const mongoose = require('mongoose');
-const config = require('../config/db.config');
-mongoose.connect(config.url);
-mongoose.Promise = global.Promise;
 const chalk = require('chalk');
-const db = mongoose.connection;
 
-db.once('open', () => {
-    let isDev = process.env.NODE_ENV === 'development'
-    console.log(chalk.rgb(123, 45, 67).bold(`连接${isDev ? chalk.blue.bold('开发环境') : chalk.blue.bold('生产环境')}数据库成功：` + chalk.hex('#DEADED').underline(db.name)))
+const isDev = process.env.NODE_ENV === 'development';
+const dbUrl = process.env.MONGO_URI; // 从 Render 环境变量读取
+
+mongoose.connect(dbUrl, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    autoReconnect: true,
+    serverSelectionTimeoutMS: 5000,
 })
-
-db.on('error', function (error) {
-    console.error('Error in MongoDb connection: ' + error);
-    mongoose.disconnect();
+.then(() => {
+    console.log(
+        chalk.rgb(123, 45, 67).bold(
+            `连接${isDev ? chalk.blue.bold('开发环境') : chalk.blue.bold('生产环境')}数据库成功：` +
+            chalk.hex('#DEADED').underline(mongoose.connection.name)
+        )
+    );
+})
+.catch(err => {
+    console.error('❌ MongoDB 连接失败: ', err);
 });
 
-db.on('close', function () {
-    console.log('***********数据库断开，重新连接数据库************');
-    mongoose.connect(config.url);
+// 监听错误
+mongoose.connection.on('error', err => {
+    console.error('MongoDB 错误: ', err);
 });
 
-module.exports = db;
+// 监听断开
+mongoose.connection.on('disconnected', () => {
+    console.warn('⚠️ MongoDB 连接已断开');
+});
+
+module.exports = mongoose.connection;
