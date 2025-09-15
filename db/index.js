@@ -2,13 +2,12 @@ const mongoose = require('mongoose');
 const chalk = require('chalk');
 
 const isDev = process.env.NODE_ENV === 'development';
-const dbUrl = process.env.MONGO_URI; // 从 Render 环境变量读取
+const dbUrl = process.env.MONGO_URI; // Render 环境变量
 
 mongoose.connect(dbUrl, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    autoReconnect: true,
-    serverSelectionTimeoutMS: 5000,
+    serverSelectionTimeoutMS: 5000, // 5秒超时
 })
 .then(() => {
     console.log(
@@ -22,14 +21,7 @@ mongoose.connect(dbUrl, {
     console.error('❌ MongoDB 连接失败: ', err);
 });
 
-// 监听错误
-mongoose.connection.on('error', err => {
-    console.error('MongoDB 错误: ', err);
-});
-
-// 监听断开
-mongoose.connection.on('disconnected', () => {
-    console.warn('⚠️ MongoDB 连接已断开');
-});
+mongoose.connection.on('error', err => console.error('MongoDB 错误: ', err));
+mongoose.connection.on('disconnected', () => console.warn('⚠️ MongoDB 连接已断开'));
 
 module.exports = mongoose.connection;
