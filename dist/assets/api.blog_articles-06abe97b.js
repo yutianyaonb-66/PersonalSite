@@ -1,1 +1,0 @@
-import{a as l}from"./server-42f87e7c.js";const o=t=>l.post("/v1/blog/blog_articles/client/list",t),s=t=>l.post("/v1/blog/blog_articles/client/detail",t),i=t=>l.post("/v1/blog/blog_articles/client/relate",t),r=t=>l.post("/v1/blog/blog_articles/client/like",t);export{s as a,o as b,r as c,i as d};
